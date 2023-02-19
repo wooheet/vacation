@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: vacation
+  profiles:
+    default: dev
+  datasource:
+    jdbc-url: jdbc:mysql://localhost:3306/kakaostyle?serverTimezone=UTC&characterEncoding=UTF-8
+    username: kakaostyle
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  h2:
+    console:
+      enabled: true
+      path: /kakaostyle
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+
+spring.jackson.default-property-inclusion: NON_NULL
+
+server:
+  port: 9100
+
+#logging:
+#  config: classpath:logback-spring.xml
+#
+#management:
+#  endpoints:
+#    web:
+#      base-path: "/management"
+#      exposure:
+#        include: "*"
+#  server:
+#    port: 9999
