@@ -1,8 +1,6 @@
-package com.kakaostyle.vacation.domain.dto.response;
+package com.kakaostyle.vacation.web.dto.response;
 
-import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.Data;
 
 @Data
 public class VacResponseDto {

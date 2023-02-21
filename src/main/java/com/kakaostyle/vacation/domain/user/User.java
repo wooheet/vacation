@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 
-import java.util.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,7 +20,7 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "username", length = 20)
+    @Column(name = "user_name", length = 20)
     private String username;
 
     @Column(length = 64, nullable = false)
@@ -37,4 +37,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Vacation> vacations;
+
+    public void update(Double availableVacDays, Double requestedVacDays) {
+        this.availableVacDays = availableVacDays;
+        this.requestedVacDays = requestedVacDays;
+    }
 }

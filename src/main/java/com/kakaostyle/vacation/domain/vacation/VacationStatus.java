@@ -1,6 +1,6 @@
-package com.kakaostyle.vacation.domain.type;
+package com.kakaostyle.vacation.domain.vacation;
 
 public enum VacationStatus {
-    PENDING, APPROVED, REJECTED, USED
+    PENDING, APPROVED, REJECTED, USED, CANCELED
 }
 

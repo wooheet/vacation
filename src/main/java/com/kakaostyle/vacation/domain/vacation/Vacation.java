@@ -1,7 +1,7 @@
-package com.kakaostyle.vacation.domain.entity;
+package com.kakaostyle.vacation.domain.vacation;
 
-import com.kakaostyle.vacation.domain.type.VacationStatus;
-import com.kakaostyle.vacation.domain.type.VacationType;
+import com.kakaostyle.vacation.domain.BaseEntity;
+import com.kakaostyle.vacation.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Table(name = "vacations")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Vacation extends BaseEntity{
+public class Vacation extends BaseEntity {
     @Id @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name = "vacation_id")
     private Long id;
@@ -25,8 +25,8 @@ public class Vacation extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private VacationStatus status;
 
-    @Column(name = "vac_days", length = 3, nullable = false)
-    private Double vacDays;
+    @Column(name = "days_used", length = 3, nullable = false)
+    private Double daysUsed;
 
     @Column(name = "start_date")
     private LocalDate startDate;

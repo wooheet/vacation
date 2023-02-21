@@ -1,16 +1,13 @@
-package com.kakaostyle.vacation.domain.type;
+package com.kakaostyle.vacation.domain.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Created by Hunseong on 2022/05/23
- */
 @Getter
 @RequiredArgsConstructor
 public enum Role {
 
-    GUEST("ROLE_GUEST"), USER("ROLE_USER");
+    GUEST("GUEST"), USER("USER"), ADMIN("ADMIN");
 
     private final String value;
 }

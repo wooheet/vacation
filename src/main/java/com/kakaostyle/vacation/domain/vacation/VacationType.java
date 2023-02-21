@@ -1,4 +1,4 @@
-package com.kakaostyle.vacation.domain.type;
+package com.kakaostyle.vacation.domain.vacation;
 
 public enum VacationType {
     ANNUAL_DAY, ANNUAL_HALF_DAY, ANNUAL_QUARTER_DAY,

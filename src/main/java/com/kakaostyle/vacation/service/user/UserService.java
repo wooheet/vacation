@@ -1,18 +1,18 @@
 package com.kakaostyle.vacation.service.user;
 
-import com.kakaostyle.vacation.domain.dto.request.VacRequestDto;
-import com.kakaostyle.vacation.domain.entity.User;
-import com.kakaostyle.vacation.domain.entity.Vacation;
+import com.kakaostyle.vacation.domain.user.User;
+import com.kakaostyle.vacation.web.dto.request.JoinRequestDto;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface UserService {
-    User getUser(Long userId);
+    List<User> findAll();
 
-    User createUser(User user);
+    User findById(Long userId);
+    User findByUsername(String username);
+    boolean existsByUsername(String username);
 
-
-    Vacation applyVacation(Long userId, VacRequestDto dto);
-
-    Vacation cancelVacation(Long userId, Long vacationId);
+    Long save(JoinRequestDto joinRequestDto);
 }

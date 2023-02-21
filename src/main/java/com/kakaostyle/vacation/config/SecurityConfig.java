@@ -33,9 +33,7 @@ public class SecurityConfig {
                 )
                 .formLogin(login -> login
                         .loginProcessingUrl("/login")
-                        .usernameParameter("userId")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/view/dashboard", true)
+                        .defaultSuccessUrl("/")
                         .permitAll()
                 )
                 .logout(withDefaults());

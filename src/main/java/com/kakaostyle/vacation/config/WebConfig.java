@@ -1,6 +1,6 @@
-package com.hunseong.lolcruit.config;
+package com.kakaostyle.vacation.config;
 
-import com.hunseong.lolcruit.auth.LoginUserArgumentResolver;
+import com.kakaostyle.vacation.auth.LoginUserArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -8,9 +8,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
-/**
- * Created by Hunseong on 2022/05/24
- */
 @RequiredArgsConstructor
 @Configuration
 public class WebConfig implements WebMvcConfigurer {

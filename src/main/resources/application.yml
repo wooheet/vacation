@@ -16,8 +16,13 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
-
-spring.jackson.default-property-inclusion: NON_NULL
+  thymeleaf:
+    check-template-location: true
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+  jackson:
+    default-property-inclusion: NON_NULL
 
 server:
   port: 9100

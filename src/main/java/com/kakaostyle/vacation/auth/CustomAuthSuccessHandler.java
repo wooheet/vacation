@@ -1,5 +1,8 @@
-package com.hunseong.lolcruit.auth;
+package com.kakaostyle.vacation.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -10,15 +13,8 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-/**
- * Created by Hunseong on 2022/05/25
- */
 @Component
 public class CustomAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -42,7 +38,6 @@ public class CustomAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHand
             request.getSession().removeAttribute("prevPage");
         }
 
-        // 기본 URI
         String uri = "/";
 
         /**
@@ -53,7 +48,7 @@ public class CustomAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHand
             uri = savedRequest.getRedirectUrl();
         } else if (prevPage != null && !prevPage.equals("")) {
             // 회원가입 - 로그인으로 넘어온 경우 "/"로 redirect
-            if (prevPage.contains("/auth/join")) {
+            if (prevPage.contains("/templates/auth/join")) {
                 uri = "/";
             } else {
                 uri = prevPage;
@@ -63,7 +58,6 @@ public class CustomAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         redirectStrategy.sendRedirect(request, response, uri);
     }
 
-    // 로그인 실패 후 성공 시 남아있는 에러 세션 제거
     protected void clearSession(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {

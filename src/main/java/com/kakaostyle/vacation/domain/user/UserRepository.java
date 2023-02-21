@@ -1,6 +1,5 @@
-package com.kakaostyle.vacation.domain.repository;
+package com.kakaostyle.vacation.domain.user;
 
-import com.kakaostyle.vacation.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,6 +7,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
 
-    Optional<Object> findByUsername(String username);
+    boolean existsByUsername(String username);
 }

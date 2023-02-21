@@ -1,5 +1,8 @@
-package com.hunseong.lolcruit.auth;
+package com.kakaostyle.vacation.auth;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -7,18 +10,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static com.hunseong.lolcruit.auth.LoginErrorCode.*;
+import static com.kakaostyle.vacation.auth.LoginErrorCode.*;
 
-/**
- * Created by Hunseong on 2022/05/24
- */
 @Component
-public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(
@@ -27,7 +24,7 @@ public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHand
             AuthenticationException exception
     ) throws IOException, ServletException {
 
-        String redirectUrl = "/auth/login?error=true&code=";
+        String redirectUrl = "/templates/auth/login?error=true&code=";
         int code;
 
 

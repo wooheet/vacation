@@ -1,19 +1,16 @@
 package com.kakaostyle.vacation.service.user;
 
-import com.kakaostyle.vacation.domain.dto.request.VacRequestDto;
-import com.kakaostyle.vacation.domain.entity.User;
-import com.kakaostyle.vacation.domain.entity.Vacation;
-import com.kakaostyle.vacation.domain.repository.UserRepository;
-import com.kakaostyle.vacation.domain.type.VacationStatus;
-import com.kakaostyle.vacation.domain.type.VacationType;
+import com.kakaostyle.vacation.domain.user.User;
+import com.kakaostyle.vacation.domain.user.UserRepository;
 import com.kakaostyle.vacation.exception.UserNotFoundException;
 import com.kakaostyle.vacation.service.vacation.VacationService;
+import com.kakaostyle.vacation.web.dto.request.JoinRequestDto;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Transactional
@@ -22,36 +19,28 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final VacationService vacationService;
 
-    @Override
-    public User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
-    }
-
-    @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
 
-    @Override
-    public Vacation applyVacation(Long userId, VacRequestDto dto) {
-        User user = getUser(userId);
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
 
-        //TODO set dto builder
-        Vacation vacation = Vacation.builder()
-                .vacationType(VacationType.ANNUAL_DAY)
-                .status(VacationStatus.APPROVED)
-                .vacDays(5.0)
-                .startDate(LocalDate.now())
-                .endDate(LocalDate.now().plusDays(5))
-                .comment("Enjoy your vacation!")
-                .build();
+    public User findByUsername(String username) {
+        return (User) userRepository.findByUsername(username).orElseThrow(() ->
+                new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+    }
 
-        return vacationService.applyVacation(user, vacation);
+    public User findById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
     @Override
-    public Vacation cancelVacation(Long userId, Long vacationId) {
-        return null;
+    public Long save(JoinRequestDto joinRequestDto) {
+        User user = joinRequestDto.toEntity();
+        return userRepository.save(user).getId();
     }
 }

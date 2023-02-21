@@ -1,8 +1,7 @@
-package com.kakaostyle.vacation.domain.repository;
+package com.kakaostyle.vacation.domain.vacation;
 
 
-import com.kakaostyle.vacation.domain.entity.User;
-import com.kakaostyle.vacation.domain.entity.Vacation;
+import com.kakaostyle.vacation.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

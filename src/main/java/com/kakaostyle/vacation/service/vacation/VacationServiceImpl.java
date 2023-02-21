@@ -1,11 +1,13 @@
 package com.kakaostyle.vacation.service.vacation;
 
-import com.kakaostyle.vacation.domain.dto.request.VacRequestDto;
-import com.kakaostyle.vacation.domain.entity.User;
-import com.kakaostyle.vacation.domain.entity.Vacation;
-import com.kakaostyle.vacation.domain.repository.VacationRepository;
-import com.kakaostyle.vacation.domain.type.VacationStatus;
+import com.kakaostyle.vacation.domain.user.User;
+import com.kakaostyle.vacation.domain.vacation.Vacation;
+import com.kakaostyle.vacation.domain.vacation.VacationRepository;
+import com.kakaostyle.vacation.domain.vacation.VacationStatus;
+import com.kakaostyle.vacation.exception.CanNotBeUsedVacationException;
+import com.kakaostyle.vacation.exception.FailRequestVacationException;
 import com.kakaostyle.vacation.exception.VacationNotFoundException;
+import com.kakaostyle.vacation.web.dto.request.VacRequestDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
@@ -35,10 +38,44 @@ public class VacationServiceImpl implements VacationService{
     }
 
     @Override
-    public Vacation applyVacation(User user, Vacation vacation) {
-        vacation = Vacation.builder()
-                .user(user)
-                .build();
+    public Vacation requestVacation(User user, VacRequestDto vacRequestDto) {
+        Double availableVacDays = user.getAvailableVacDays();
+
+        if (availableVacDays <= 0) {
+            throw new CanNotBeUsedVacationException("사용 가능한 연차가 없습니다.");
+        }
+
+        LocalDate requestStartDate = vacRequestDto.getStartDate();
+        LocalDate requestEndDate = vacRequestDto.getEndDate();
+
+        if (requestStartDate.isAfter(requestEndDate)) {
+            throw new FailRequestVacationException("종료 날짜가 시작 날짜 보다 커야 합니다.");
+        }
+
+        List<Vacation> vacations = vacationRepository.findByUserId(user.getId()).get();
+
+        for (Vacation vacation : vacations) {
+            LocalDate startDate = vacation.getStartDate();
+            LocalDate endDate = vacation.getEndDate();
+
+            if (!requestStartDate.isBefore(startDate) && !requestStartDate.isAfter(endDate)) {
+                throw new FailRequestVacationException("이미 휴가 일정이 포함되어 있습니다.");
+            }
+        }
+
+        Period betweenPeriod = Period.between(requestStartDate, requestEndDate);
+
+        Double daysUsed = user.getRequestedVacDays() + betweenPeriod.getDays();
+        Double availableResultDays =  availableVacDays - betweenPeriod.getDays();
+
+        user.update(availableResultDays, daysUsed);
+
+        Vacation vacation = vacRequestDto.toEntity(
+                user,
+                (double) betweenPeriod.getDays(),
+                VacationStatus.APPROVED
+        );
+
         return vacationRepository.save(vacation);
     }
 

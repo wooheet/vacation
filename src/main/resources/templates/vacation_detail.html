@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Vacation Request System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<h1>Vacation Request System</h1>
+<form th:action="@{/}" method="GET">
+    <button type="submit" >HOME</button>
+</form>
+<hr />
+<h2>Vacation List</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Index | </th>
+        <th>Vacation Type | </th>
+        <th>Vacation Status | </th>
+        <th>Vacation Start Date | </th>
+        <th>Vacation End Date | </th>
+        <th>Vacation Cancellation | </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>1</td>
+        <td>Sick Leave</td>
+        <td>Approved</td>
+        <td>2023-02-17</td>
+        <td>2023-02-18</td>
+        <td><button>Cancel</button></td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>Annual Leave</td>
+        <td>Pending</td>
+        <td>2023-03-01</td>
+        <td>2023-03-05</td>
+        <td><button>Cancel</button></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Vacation Request System</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Vacation Request System</h1>
+        <form th:action="@{/vacation/request}" method="GET">
+            <button type="submit" >Vacation Request</button>
+        </form>
+        <hr />
+        <h2>User List</h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th>| Index | </th>
+                <th>Name | </th>
+                <th>Available Vacation days | </th>
+                <th>Used vacation days | </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>username</td>
+                <form th:action="@{/vacation/detail}" method="GET">
+                    <td><button>Detail</button></td>
+                </form>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>username</td>
+                <td><button>Detail</button></td>
+            </tr>
+            </tbody>
+        </table>
+    </body>
+</html>
