@@ -15,4 +15,6 @@ public interface UserService {
     boolean existsByUsername(String username);
 
     Long save(JoinRequestDto joinRequestDto);
+
+    User getUser();
 }

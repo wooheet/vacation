@@ -1,6 +1,7 @@
 package com.kakaostyle.vacation.config;
 
 import jakarta.persistence.EntityManagerFactory;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,10 @@ import java.util.Properties;
 @Configuration
 @EnableTransactionManagement
 public class DataSourceConfig {
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
     @Bean
     @ConfigurationProperties(prefix = "spring.datasource")

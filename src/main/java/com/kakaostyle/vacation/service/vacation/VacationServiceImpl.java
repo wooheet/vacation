@@ -4,41 +4,45 @@ import com.kakaostyle.vacation.domain.user.User;
 import com.kakaostyle.vacation.domain.vacation.Vacation;
 import com.kakaostyle.vacation.domain.vacation.VacationRepository;
 import com.kakaostyle.vacation.domain.vacation.VacationStatus;
+import com.kakaostyle.vacation.domain.vacation.VacationType;
 import com.kakaostyle.vacation.exception.CanNotBeUsedVacationException;
+import com.kakaostyle.vacation.exception.FailCancelVacationException;
 import com.kakaostyle.vacation.exception.FailRequestVacationException;
 import com.kakaostyle.vacation.exception.VacationNotFoundException;
+import com.kakaostyle.vacation.util.Utils;
 import com.kakaostyle.vacation.web.dto.request.VacRequestDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Period;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class VacationServiceImpl implements VacationService{
+public class VacationServiceImpl implements VacationService {
+    private final Utils utils;
     private final VacationRepository vacationRepository;
 
     @Override
-    public Vacation getVacation(Long id) {
-        return null;
+    public List<Vacation> findAll() {
+        return vacationRepository.findAll();
     }
 
     @Override
-    public List<Vacation> getVacationsByUser(User user) {
+    public Vacation findById(Long id) {
+        return vacationRepository.findById(id)
+                .orElseThrow(() -> new VacationNotFoundException("휴가를 찾을 수 없습니다."));
+    }
+
+    @Override
+    public List<Vacation> findByUser(User user) {
         return vacationRepository.findByUser(user);
     }
 
     @Override
-    public Vacation requestVacation(User user, VacRequestDto vacRequestDto) {
+    public Vacation request(User user, VacRequestDto vacRequestDto) {
         Double availableVacDays = user.getAvailableVacDays();
 
         if (availableVacDays <= 0) {
@@ -48,90 +52,122 @@ public class VacationServiceImpl implements VacationService{
         LocalDate requestStartDate = vacRequestDto.getStartDate();
         LocalDate requestEndDate = vacRequestDto.getEndDate();
 
-        if (requestStartDate.isAfter(requestEndDate)) {
-            throw new FailRequestVacationException("종료 날짜가 시작 날짜 보다 커야 합니다.");
-        }
+        double daysUsed;
+        double totalDaysUsed;
+        double remainAvailableDays;
 
-        List<Vacation> vacations = vacationRepository.findByUserId(user.getId()).get();
+        if (!vacRequestDto.getVacationType().equals(VacationType.ANNUAL_DAY)) {
 
-        for (Vacation vacation : vacations) {
-            LocalDate startDate = vacation.getStartDate();
-            LocalDate endDate = vacation.getEndDate();
+            if (vacRequestDto.getStartDate() != null) {
+                if (vacRequestDto.getEndDate() != null
+                        && !vacRequestDto.getStartDate().isEqual(vacRequestDto.getEndDate())) {
+                    throw new FailRequestVacationException("시작 날짜와 종료 날짜가 동일하지 않습니다.");
+                }
 
-            if (!requestStartDate.isBefore(startDate) && !requestStartDate.isAfter(endDate)) {
-                throw new FailRequestVacationException("이미 휴가 일정이 포함되어 있습니다.");
+                requestStartDate = vacRequestDto.getStartDate();
+                requestEndDate = vacRequestDto.getStartDate();
+            } else {
+                requestStartDate = LocalDate.now();
+                requestEndDate = LocalDate.now();
             }
+
+            utils.calculateVacationDaysExcludingHolidays(requestStartDate, requestEndDate);
+
+            totalDaysUsed = user.getRequestedVacDays() + vacRequestDto.getVacationType().getDays();
+            remainAvailableDays = availableVacDays - vacRequestDto.getVacationType().getDays();
+            daysUsed = vacRequestDto.getVacationType().getDays();
+        } else {
+            if (vacRequestDto.getStartDate() == null
+                    || vacRequestDto.getEndDate() == null) {
+                throw new FailRequestVacationException("시작 날짜와 종료 날짜를 입력해주세요.");
+            }
+
+            double daysExcludingHolidays =
+                    utils.calculateVacationDaysExcludingHolidays(requestStartDate, requestEndDate);
+
+            totalDaysUsed = user.getRequestedVacDays() + daysExcludingHolidays;
+            remainAvailableDays =  availableVacDays - daysExcludingHolidays;
+            daysUsed = daysExcludingHolidays;
         }
 
-        Period betweenPeriod = Period.between(requestStartDate, requestEndDate);
+        requestValidation(user, requestStartDate, requestEndDate);
 
-        Double daysUsed = user.getRequestedVacDays() + betweenPeriod.getDays();
-        Double availableResultDays =  availableVacDays - betweenPeriod.getDays();
+        VacationStatus status;
+        if (LocalDate.now().isEqual(requestStartDate)) {
+            status = VacationStatus.USED;
+        } else {
+            status = VacationStatus.APPROVED;
+        }
 
-        user.update(availableResultDays, daysUsed);
-
+        user.update(remainAvailableDays, totalDaysUsed);
         Vacation vacation = vacRequestDto.toEntity(
                 user,
-                (double) betweenPeriod.getDays(),
-                VacationStatus.APPROVED
+                daysUsed,
+                status,
+                requestStartDate,
+                requestEndDate
         );
 
         return vacationRepository.save(vacation);
     }
 
+    public void requestValidation(User user, LocalDate requestStartDate, LocalDate requestEndDate) {
+        if (LocalDate.now().isAfter(requestStartDate)) {
+            throw new FailRequestVacationException("시작 날짜가 오늘 보다 커야 합니다.");
+        }
+
+        if (requestStartDate.isAfter(requestEndDate)) {
+            throw new FailRequestVacationException("종료 날짜가 시작 날짜 보다 커야 합니다.");
+        }
+
+        List<Vacation> vacations = vacationRepository.findByUserId(user.getId());
+
+        for (Vacation vacation : vacations) {
+            LocalDate startDate = vacation.getStartDate();
+            LocalDate endDate = vacation.getEndDate();
+
+            if ((vacation.getStatus().equals(VacationStatus.APPROVED)
+                    || vacation.getStatus().equals(VacationStatus.PENDING)
+                    || vacation.getStatus().equals(VacationStatus.USED))
+                    && (!requestStartDate.isBefore(startDate) && !requestStartDate.isAfter(endDate))) {
+                throw new FailRequestVacationException("이미 휴가 일정이 포함되어 있습니다.");
+            }
+        }
+    }
+
+
     @Override
-    public Vacation updateVacation(Long vacationId, VacRequestDto dto) {
+    public Vacation update(Long vacationId, VacRequestDto dto) {
         Vacation existingVacation = vacationRepository.findById(vacationId)
-                .orElseThrow(() -> new VacationNotFoundException("Vacation not found"));
+                .orElseThrow(() -> new VacationNotFoundException("휴가를 찾을 수 없습니다."));
 
-        existingVacation.builder()
-                .startDate(dto.getStartDate())
-                .endDate(dto.getEndDate())
-                .vacationType(dto.getVacationType())
-                .status(VacationStatus.APPROVED)
-                .build();
-
+        // 휴가 상태 변경 ex) VacationStatus.REQ_CANCELED -> VacationStatus.CANCELED
+        existingVacation.update(dto.getStatus());
         return vacationRepository.save(existingVacation);
     }
 
     @Override
-    public void deleteVacation(Long vacationId) {
+    public void cancel(Long vacationId) {
         Vacation existingVacation = vacationRepository.findById(vacationId)
-                .orElseThrow(() -> new VacationNotFoundException("Vacation not found"));
+                .orElseThrow(() -> new VacationNotFoundException("휴가를 찾을 수 없습니다."));
 
-        vacationRepository.delete(existingVacation);
-    }
+        if (existingVacation.getStatus().equals(VacationStatus.CANCELED)
+                || existingVacation.getStatus().equals(VacationStatus.REQ_CANCEL)
+                || existingVacation.getStatus().equals(VacationStatus.REJECTED)
+                || existingVacation.getStatus().equals(VacationStatus.USED)) {
+            throw new FailCancelVacationException("이미 사용된 휴가이거나, 취소된 휴가이거나, 거부된 휴가입니다.");
+        }
 
-    @Override
-    public double calculateVacationDaysExcludingHolidays(LocalDate startDate, LocalDate endDate) {
-        List<LocalDate> holidays = Arrays.asList(
-                LocalDate.of(2023, 1, 1),
-                LocalDate.of(2023, 2, 12),
-                LocalDate.of(2023, 3, 1)
-                // Add more holidays as needed
-        );
+        if (existingVacation.getStatus().equals(VacationStatus.APPROVED)
+                || existingVacation.getStatus().equals(VacationStatus.PENDING)) {
+            System.out.println("CANCEL");
+            User user = existingVacation.getUser();
 
-        long totalDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+            Double daysUsed = user.getRequestedVacDays() - existingVacation.getDaysUsed();
+            Double availableResultDays = user.getAvailableVacDays() + existingVacation.getDaysUsed();
 
-        long weekends = IntStream.range(0, (int) totalDays)
-                .mapToObj(startDate::plusDays)
-                .filter(date -> date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY)
-                .count();
-
-        long holidaysCount = holidays.stream()
-                .filter(date -> !date.isBefore(startDate) && !date.isAfter(endDate))
-                .count();
-
-        long daysExcludingHolidays = totalDays - weekends - holidaysCount;
-
-        return (double) daysExcludingHolidays;
-    }
-
-    @Override
-    @Scheduled(cron = "0 0 0 1 1 ?")
-    @Transactional
-    public void VacationReset() {
-        System.out.println("VACATION RESET");
-//        em.createQuery("update Account set annualCnt = 15").executeUpdate();
+            user.update(availableResultDays, daysUsed);
+            existingVacation.update(VacationStatus.REQ_CANCEL);
+        }
     }
 }

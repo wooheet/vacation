@@ -12,7 +12,6 @@
         </form>
         <hr />
         <h2>User List</h2>
-
         <table>
             <thead>
             <tr>
@@ -20,20 +19,18 @@
                 <th>Name | </th>
                 <th>Available Vacation days | </th>
                 <th>Used vacation days | </th>
+                <th>Vacation | </th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>1</td>
-                <td>username</td>
-                <form th:action="@{/vacation/detail}" method="GET">
-                    <td><button>Detail</button></td>
+            <tr th:each="user , index: ${users}">
+                <td th:text="${index.index}">#</td>
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.availableVacDays}"></td>
+                <td th:text="${user.requestedVacDays}"></td>
+                <form th:action="@{/vacation/detail/{id}(id = ${user.id})}" method="GET">
+                    <td><button>DETAIL</button></td>
                 </form>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>username</td>
-                <td><button>Detail</button></td>
             </tr>
             </tbody>
         </table>

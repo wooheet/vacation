@@ -40,5 +40,9 @@ public class Vacation extends BaseEntity {
 
     @Column(length = 500)
     private String comment;
+
+    public void update(VacationStatus status) {
+        this.status = status;
+    }
 }
 

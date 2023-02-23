@@ -21,11 +21,14 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
     cache: false
-  jackson:
-    default-property-inclusion: NON_NULL
 
 server:
   port: 9100
+
+vacation:
+  default:
+    annual_days: 15.0
+    reset_date: 01-01
 
 #logging:
 #  config: classpath:logback-spring.xml

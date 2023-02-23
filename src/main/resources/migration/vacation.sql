@@ -2,7 +2,7 @@ CREATE TABLE vacations (
                            vacation_id BIGINT NOT NULL AUTO_INCREMENT,
                            vacation_type VARCHAR(20),
                            status VARCHAR(10),
-                           days_used DECIMAL(10, 1) NOT NULL,
+                           days_used DECIMAL(10, 2) NOT NULL,
                            start_date DATE NOT NULL,
                            end_date DATE NOT NULL,
                            user_id BIGINT,

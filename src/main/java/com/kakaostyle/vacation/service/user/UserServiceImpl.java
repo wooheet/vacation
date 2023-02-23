@@ -3,10 +3,10 @@ package com.kakaostyle.vacation.service.user;
 import com.kakaostyle.vacation.domain.user.User;
 import com.kakaostyle.vacation.domain.user.UserRepository;
 import com.kakaostyle.vacation.exception.UserNotFoundException;
-import com.kakaostyle.vacation.service.vacation.VacationService;
 import com.kakaostyle.vacation.web.dto.request.JoinRequestDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final VacationService vacationService;
 
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
@@ -35,12 +34,19 @@ public class UserServiceImpl implements UserService {
 
     public User findById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
     @Override
     public Long save(JoinRequestDto joinRequestDto) {
         User user = joinRequestDto.toEntity();
         return userRepository.save(user).getId();
+    }
+
+    @Override
+    public User getUser() {
+        String currentUserName  = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(currentUserName).orElseThrow(() ->
+                new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }

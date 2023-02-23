@@ -18,12 +18,14 @@ public class VacRequestDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private VacationType vacationType;
+    private VacationStatus status;
     private String comment;
 
-    public Vacation toEntity(User user, Double days_used, VacationStatus status) {
+    public Vacation toEntity(User user, Double days_used, VacationStatus status,
+                             LocalDate startDate, LocalDate endDate) {
         return Vacation.builder()
-                .startDate(this.startDate)
-                .endDate(this.endDate)
+                .startDate(startDate)
+                .endDate(endDate)
                 .vacationType(this.vacationType)
                 .comment(this.comment)
                 .daysUsed(days_used)

@@ -1,13 +1,9 @@
 package com.kakaostyle.vacation.web.dto.response;
 
 import com.kakaostyle.vacation.domain.user.Role;
-import lombok.*;
+import lombok.Data;
 
-@Getter
-@Builder
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Data
 public class UserResponseDto {
 
     private Long id;
